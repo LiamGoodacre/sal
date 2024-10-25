@@ -1,0 +1,43 @@
+cabal-version:      3.0
+name:               sal
+version:            0.1.0.0
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             Liam Goodacre
+maintainer:         goodacre.liam@gmail.com
+category:           Data
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+
+common warnings
+    ghc-options: -Wall
+
+executable sal
+    import:           warnings
+    main-is:          Main.hs
+    other-modules:
+      Inflation,
+      Salaries,
+      Types,
+    default-extensions:
+      BlockArguments
+      DeriveAnyClass
+      DerivingStrategies
+      DerivingVia
+      DisambiguateRecordFields
+      DuplicateRecordFields
+      LambdaCase
+      NoImplicitPrelude
+      OverloadedRecordDot
+      OverloadedStrings
+    build-depends:
+      aeson,
+      base ^>=4.19.1.0,
+      bytestring,
+      containers,
+      http-conduit,
+      mtl,
+      rio,
+      text,
+    hs-source-dirs:   app
+    default-language: GHC2021
