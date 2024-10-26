@@ -12,15 +12,6 @@ import RIO.ByteString.Lazy qualified
 import Salaries qualified
 import Types qualified
 
-data Running = Running
-  { current :: Types.Salary
-  }
-
-emptyRunning :: Running
-emptyRunning = Running
-  { current = Types.Salary 0
-  }
-
 main :: IO ()
 main = runSimpleApp do
   inflations <- liftIO Inflation.grabInflationData >>= \case
@@ -44,11 +35,11 @@ main = runSimpleApp do
   let startingSalaryTime :: Types.Time
       startingSalaryTime = minimum $ Map.keys salaries
 
-  let loop :: Types.Time -> StateT Running (RIO SimpleApp) [Types.Result]
+  let loop :: Types.Time -> StateT Types.Salary (RIO SimpleApp) [Types.Result]
       loop now = do
         logDebug $ "Processing: " <> displayShow now
 
-        running <- State.get
+        previousSalary <- State.get
 
         let inflation :: Rational
             inflation = Map.findWithDefault (error $ "no inflation found " <> show now) now inflations
@@ -61,7 +52,7 @@ main = runSimpleApp do
         logDebug $ "Inflation ratio: " <> displayShow @Centi (realToFrac inflationRatio)
 
         let salary :: Centi
-            salary = Map.findWithDefault running.current.getSalary now salaries
+            salary = Map.findWithDefault previousSalary.getSalary now salaries
 
         logDebug $ "Salary: " <> displayShow salary
 
@@ -77,12 +68,12 @@ main = runSimpleApp do
                 worth = Types.Worth $ fromRational inflationAmount
               }
 
-        State.put running { current = Types.Salary salary }
+        State.put (Types.Salary salary)
 
         if now == finalInflationTime
           then pure [result]
           else (result :) <$> loop (Types.nextTime now)
 
-  (results :: [Types.Result]) <- State.evalStateT (loop startingSalaryTime) emptyRunning
+  (results :: [Types.Result]) <- State.evalStateT (loop startingSalaryTime) (Types.Salary 0)
 
   RIO.ByteString.Lazy.putStr $ Aeson.encode results
