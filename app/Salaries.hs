@@ -7,16 +7,16 @@ import Data.Map.Strict qualified as Map
 import RIO
 import Types qualified
 
-newtype Year = Year { getYear :: Integer }
+newtype Year = Year {getYear :: Integer}
   deriving newtype (Show, Eq, Ord)
   deriving newtype (Aeson.FromJSON)
 
 -- January = 1, ..., December = 12
-newtype Month = Month { getMonth :: Int }
+newtype Month = Month {getMonth :: Int}
   deriving newtype (Show, Eq, Ord)
   deriving newtype (Aeson.FromJSON)
 
-newtype Salary = Salary { getSalary :: Centi }
+newtype Salary = Salary {getSalary :: Centi}
   deriving newtype (Show, Eq, Ord)
   deriving newtype (Aeson.FromJSON)
 

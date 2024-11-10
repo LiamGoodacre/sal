@@ -25,10 +25,15 @@ You could run this to get a csv:
 
 ```bash
 cabal build
-cat salaries.json | 2>/dev/null cabal run sal | jq -r '"Date,Salary,Worth", (.[] | "\(.time.year)-\(.time.month)-1,\(.salary),\(.worth)")' > result.csv
+cat salaries.json | 2>/dev/null cabal run sal \
+  | jq -r '
+      "Date,Salary,\(.[0].worth | map("Worth-\(.time.year)-\(.time.month)") | join(","))",
+      (.[] | "\(.time.year)-\(.time.month)-1,\(.salary),\(.worth | map("\(.worth)") | join(","))")
+    ' > result.csv
 ```
 
 Plonk that into a spreadsheet and make a graph:
 
 ![Graph](example-graph.png)
 
+You can also pass in additional yyyy-m arguments to get the worth relative to those times.

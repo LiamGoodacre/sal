@@ -9,20 +9,20 @@ import Network.HTTP.Simple as Http
 import RIO
 import Types qualified
 
-newtype ByReading t = ByReading { getByReading :: t }
+newtype ByReading t = ByReading {getByReading :: t}
   deriving stock (Show, Generic)
 
-instance Read t => Aeson.FromJSON (ByReading t) where
+instance (Read t) => Aeson.FromJSON (ByReading t) where
   parseJSON = Aeson.withText "ByReading" \t ->
     case readMaybe (Text.unpack t) of
       Just x -> pure (ByReading x)
       Nothing -> fail "Failed to parse"
 
-newtype Year = Year { getYear :: Integer }
+newtype Year = Year {getYear :: Integer}
   deriving newtype (Show, Eq, Ord, Read)
   deriving (Aeson.FromJSON) via (ByReading Year)
 
-newtype Month = Month { getMonth :: Int }
+newtype Month = Month {getMonth :: Int}
   deriving newtype (Show, Eq, Ord)
 
 instance Aeson.FromJSON Month where
@@ -41,7 +41,7 @@ instance Aeson.FromJSON Month where
     "December" -> pure (Month 12)
     _ -> fail "Failed to parse"
 
-newtype Value = Value { getValue :: Fixed.Deci }
+newtype Value = Value {getValue :: Fixed.Deci}
   deriving newtype (Show, Eq, Ord, Read)
   deriving (Aeson.FromJSON) via (ByReading Value)
 
@@ -80,12 +80,13 @@ makeInflationMap monthsDto = Map.fromList do
 
 grabInflationData :: IO (Either Text InflationMap)
 grabInflationData = do
-  response <- Http.parseRequest "GET https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/czeq/mm23/data" >>= \request ->
-    Http.httpJSONEither @_ @InflationDataDto do
-      request
-        & Http.addRequestHeader "User-Agent" "!"
-        & Http.addRequestHeader "Accept-Language" "en-GB,en;q=0.5"
-        & Http.addRequestHeader "Accept-Encoding" "gzip, deflate, br, zstd"
+  response <-
+    Http.parseRequest "GET https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/czeq/mm23/data" >>= \request ->
+      Http.httpJSONEither @_ @InflationDataDto do
+        request
+          & Http.addRequestHeader "User-Agent" "!"
+          & Http.addRequestHeader "Accept-Language" "en-GB,en;q=0.5"
+          & Http.addRequestHeader "Accept-Encoding" "gzip, deflate, br, zstd"
 
   pure case Http.getResponseBody response of
     Left e -> Left (Text.pack (show e))

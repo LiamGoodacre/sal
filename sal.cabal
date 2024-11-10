@@ -9,11 +9,8 @@ category:           Data
 build-type:         Simple
 extra-doc-files:    CHANGELOG.md
 
-common warnings
-    ghc-options: -Wall
-
 executable sal
-    import:           warnings
+    ghc-options: -Wall -Werror -O2
     main-is:          Main.hs
     other-modules:
       Inflation,
@@ -39,5 +36,6 @@ executable sal
       mtl,
       rio,
       text,
+      unliftio,
     hs-source-dirs:   app
     default-language: GHC2021
